@@ -49,6 +49,9 @@ def register_players
       end
       Hash[@player_scores.map{ |k, v| [k.to_sym, v] }]
   end
+  
+  puts "All added players registered. Exiting to Main Menu"
+  puts "Select the option of 1. Play game to begin Being Lucky"
 end
 
 def leaderboards
@@ -80,30 +83,64 @@ def play_game
     	Dice.scoring_first_turn_noncombo
     	puts "PRINTING RESULTS FOR TURN - FIRST ROLL"
     	Dice.print_results
-    	update_score # Need to call this appt place
+    	 # Need to call this appt place
     	puts "================================================="
     else
-    	puts "Couldn`t Roll. Roll again perhaps."
-    	puts "================================================="
+      if Dice.get_all_dice_score_status == true
+        puts "================================================="
+        puts "You have availed to add score from all 5 dices"
+        puts "================================================="
+      else
+        puts "================================================="
+      	puts "Couldn`t Roll. Roll again perhaps."
+      	puts "================================================="
+      end
     end
     
-    if Dice.curr_score > 300
-      puts "Your current score is #{Dice.curr_score}."
-      print "Roll Second Turn? y/n\n"
+    # if Dice.get_all_dice_score_status
+    #   update_score
+    #   Dice.set_all_dice_score_status(false)
+    # end
+    
+    if Dice.curr_score >= 300 && Dice.get_all_dice_score_status == false
+
+      print "Roll another turn? y/n\n"
       puts "================================================="
       if gets.chomp.to_s == "y"
         puts "PRINTING RESULTS FOR TURN - SECOND ROLL"
       	Dice.scoring_second_turn
+      	puts "================================================="
+      	puts "Exiting this turn"
+      	puts "================================================="
+      	puts "Accumulated score by now is : #{Dice.get_accumulated_score}"
+      	if Dice.get_accumulated_score > 0
+      	  update_score  
+      	  Dice.set_curr_score
+      	end
+      	
       	#print_results
       	#update_score
       	puts "================================================="
       else
-      	puts "No Second Turn availed or available"
+        update_score
+        puts "Score updated. Your current score is #{Dice.curr_score}."
+        puts "================================================="   
+        Dice.set_curr_score
+      	puts "No Another Turn availed or available"
       	puts "================================================="
       end
     else
-      puts "Oops, Your score is less than 300. You can`t roll second turn, Next player"
-      puts "Will take turn"
+      if Dice.get_all_dice_score_status == true
+        update_score
+        puts "Score updated. Your current score is #{Dice.curr_score}."
+        puts "=================================================" 
+        Dice.set_curr_score
+      	puts "No Another Turn availed or available"
+      	puts "================================================="        
+      else
+        puts "Oops, Your score #{Dice.curr_score} is less than 300. You can`t roll second turn, Next player"
+        puts "Will take turn"
+      end
     end
 end
 
@@ -119,8 +156,13 @@ def select_player_to_play
   puts "Select Which player wants to take the first turn? i.e. Type Numeric no. of player name"
   puts "================================================="
   @selected_player_name = gets.chomp.to_i - 1
-  puts "#{@players_names[@selected_player_name]} will take this turn"
-  puts "================================================="
+  #if (@players_name.include? @players_names[@selected_player_name])
+    puts "#{@players_names[@selected_player_name]} will take this turn"
+    puts "================================================="
+ # else
+  #  puts "Select a valid player again"
+ #   select_player_to_play
+  #end
 end
 
 def update_score

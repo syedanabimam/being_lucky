@@ -1,14 +1,28 @@
 module Dice
     @current_score = 0
+    @all_dice_scores_add = false
     #@final_score_achieved = false
     
     def curr_score
         @current_score
     end
     
+    def self.set_curr_score
+        @current_score = 0
+    end
+    
+    def get_all_dice_score_status
+       @all_dice_scores_add
+    end
+    
+    def set_all_dice_score_status(value)
+        @all_dice_scores_add = value
+    end
+    
     def dice_first_turn
-    	@dice = Array.new(5) { rand(1...6) } #create random array between 1..6
+    	#@dice = Array.new(5) { rand(1...6) } #create random array between 1..6
         #@dice = [2, 2, 2, 1, 5]
+        @dice = [3, 1, 5, 3, 3]
         
     	@combo_check = @dice.select{ |e| @dice.count(e) > 2 } #find 3 combo pattern
     	
@@ -28,24 +42,35 @@ module Dice
     end
     
     def check_if_all_dices_scores
-       @all_dice_scores = false
+       
        if ((@combo_num.length > 0) && (@remaining_dice.include? 1) && (@remaining_dice.include? 5))
-           @all_dice_scores = true
+           
            puts "================================================="
            puts "Dice results(arr): #{@dice}"
            puts "================================================="
            puts "All dices are scoring. You have the option to roll all the dices again."
-           puts "Do you want to roll them again or resume the game?\n"
+           puts "================================================="
+           puts "Do you want to roll them again or not (score for 5 dices will be added)?\n"
+           puts "================================================="
            print "which ever it is, please proceed by entering y/n?\n"
            puts "================================================="
            if gets.chomp.to_s == "y"
+               puts "================================================="
                puts "Rolling the dices again."
+               puts "================================================="
                dice_first_turn
            else
-               puts "Resuming the game"
+               puts "================================================="
+               puts "You decided not to roll the 5 dices. Score will be added for the 5 dices"
+               puts "================================================="
+               scoring_first_turn_combo
+               scoring_first_turn_noncombo
+               @all_dice_scores_add = true
            end
        else
+          puts "================================================="
           puts "Not all dices are scoring"
+          puts "================================================="
 
        end
     end
@@ -72,7 +97,9 @@ module Dice
        	#puts "Added 600 score"
        	@current_score = 600
        else
+        puts "================================================="   
        	puts "No three number combo pattern detected"
+       	puts "================================================="
        end
        #@remaining_dice = @dice - @combo
     end
@@ -106,61 +133,124 @@ module Dice
     end
     
     def scoring_second_turn
+        @accumulated_score = 0
     	@second_dice = Array.new(@non_dice_array.count) { rand(1...6) }
     	#@second_dice = [3, 6]
     	@second_single_score_dice_arr = []
     
     	@second_dice.each do |num|
     	   	if num == 1
-    	   		@current_score = @current_score + 100 	
+    	   		@accumulated_score = @accumulated_score + 100 	
     	   		@second_single_score_dice_arr << num
     	   	elsif num == 5
-    	   		@current_score = @current_score + 50 
+    	   		@accumulated_score = @accumulated_score + 50 
     	   		@second_single_score_dice_arr << num
     	   	end
-    	end   	
-       	@second_turn_remainder = @second_dice - @second_single_score_dice_arr
+    	end
+    	#@current_score = @current_score + @accumulated_score
+    	
+    	@second_turn_remainder = @second_dice - @second_single_score_dice_arr
        	puts "================================================="
     	puts "Second turn results for remaining dice(s): #{@second_dice}"
     	puts "================================================="
-    	puts "Second turn score: #{@current_score}"
+    	puts "Second turn (Current + Accumulated) score: #{@current_score + @accumulated_score}"
     	puts "================================================="
-    	puts "Remaining elements after second round: #{@second_turn_remainder}"
+    	puts "Remaining elements now: #{@second_turn_remainder}"
     	puts "================================================="
-    	loop do
-    		print "Want another go? y/n \n"
-    		puts "================================================="
-    		proceed = gets.chomp.to_s
-    		if proceed == "y"
-    			@second_dice_another_roll = Array.new(@second_turn_remainder.count) { rand(1...6) }
-    			@second_single_score_dice_arr_again = []
-    			@second_dice_another_roll.each do |num|
-    			   	if num == 1
-    			   		@current_score = @current_score + 100 	
-    			   		@second_single_score_dice_arr_again << num
-    			   	elsif num == 5
-    			   		@current_score = @current_score + 50 
-    			   		@second_single_score_dice_arr_again << num
-    			   	end
-    			end 
-    			@second_turn_again_remainder = @second_dice_another_roll - @second_single_score_dice_arr_again
-    			@second_turn_remainder = @second_turn_again_remainder
-    			puts "================================================="
-    			puts "Dice array: #{@second_dice_another_roll}"
-    			puts "================================================="
-    			puts "@second_single_score_dice_arr_again : #{@second_single_score_dice_arr_again}"
-    			puts "================================================="
-    			puts "Remaining elements on second turn, second roll: #{@second_turn_again_remainder}"
-    			puts "================================================="
-    			puts "Total Score by now: #{@current_score}"
-    			puts "================================================="
-    		end
-    		if proceed == "n" || @second_turn_remainder.count == 0
-    			puts "No more dice to roll for this turn"
-    			break 
-    		end
-    	end
     	
+    	
+        loop do
+            puts "================================================="
+            puts "Accumulated Score: #{@accumulated_score}"
+            puts "================================================="
+            if @accumulated_score > 0
+                ##puts "Your accumulated score is #{@accumulated_score} which is higher than 0, so you can play"
+        		if @second_turn_remainder.count == 0
+        		    @current_score = @current_score + @accumulated_score
+        		    puts "================================================="
+        			puts "Total Score by now: #{@current_score}"
+        			puts "================================================="
+        			puts "No more dice to roll for this turn" 
+        			break 
+        		end
+        		print "Want another go? y/n \n"
+        		puts "================================================="
+        		proceed = gets.chomp.to_s
+        		if proceed == "y" && @accumulated_score > 0
+        			@second_dice_another_roll = Array.new(@second_turn_remainder.count) { rand(1...6) }
+        			@second_single_score_dice_arr_again = []
+        			@accumulated_score_more = 0
+        			@second_dice_another_roll.each do |num|
+        			   	if num == 1
+        			   		@accumulated_score_more = @accumulated_score_more + 100 	
+        			   		@second_single_score_dice_arr_again << num
+        			   	elsif num == 5
+        			   		@accumulated_score_more = @accumulated_score_more + 50 
+        			   		@second_single_score_dice_arr_again << num
+        			   	end
+        			end 
+        			
+        			@second_turn_again_remainder = @second_dice_another_roll - @second_single_score_dice_arr_again
+        			@second_turn_remainder = @second_turn_again_remainder
+        			puts "================================================="
+        			puts "Dice array: #{@second_dice_another_roll}"
+        			puts "================================================="
+        			puts "@second_single_score_dice_arr_again : #{@second_single_score_dice_arr_again}"
+        			puts "================================================="
+        			puts "Remaining elements on second turn, second roll: #{@second_turn_again_remainder}"
+        			puts "================================================="
+        			puts "Total (Current + Accumulated) Score by now: #{@current_score + @accumulated_score}"
+        			puts "================================================="
+        			
+        			if @accumulated_score_more == 0
+        			   puts "================================================="
+        			   puts "You scored #{@accumulated_score_more} in this roll"
+        			   puts "================================================="
+        			   puts "Therefore, you will lose all your accumulated score and your turn as well"
+        			   puts "=================================================" 
+        			   puts "Your current score is: #{@current_score}"
+        			   puts "================================================="
+        			   break
+        			else
+        			   puts "=================================================" 
+        			   puts "Your current accumulated score is #{@accumulated_score}"
+        			   puts "================================================="
+        			   puts "You scored #{@accumulated_score_more} in this turn which will be added to your accumulated score"
+        			   @accumulated_score = @accumulated_score + @accumulated_score_more 
+        			   puts "================================================="
+        			   puts "Your post adding accumulated score is now #{@accumulated_score}"
+        			   puts "================================================="
+        			end
+        		end
+        		if proceed == "n" 
+        		    @current_score = @current_score + @accumulated_score
+        		    puts "You decided not to take another roll"
+        		    puts "================================================="
+        		    puts "Your accumulated score is #{@accumulated_score}"
+        		    puts "================================================="
+        			puts "Total Score by now: #{@current_score}"
+        			break 
+        		end
+            else
+                puts "Your score for this roll is 0 therefore no more turns for you"
+        	    puts "================================================="
+    			puts "Total Accumulated Score by now: #{@current_score}"
+    			puts "================================================="
+    			puts "No more dice to roll for this turn"
+    			break     
+            end
+        end    	    
+    	
+    	#if @accumulated_score == 0
+    	#    puts "You couldn`t score(#{@accumulated_score}) with any dice in this turn hence no more turns for you."
+    	 #   puts "Next player will play now!"
+    	#else
+    	#end
+	
+    end
+    
+    def get_accumulated_score 
+        @accumulated_score
     end
     
     
