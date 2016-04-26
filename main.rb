@@ -87,17 +87,23 @@ def play_game
     	puts "================================================="
     end
     
-    print "Roll Second Turn? y/n\n"
-    puts "================================================="
-    if gets.chomp.to_s == "y"
-      puts "PRINTING RESULTS FOR TURN - SECOND ROLL"
-    	Dice.scoring_second_turn
-    	#print_results
-    	#update_score
-    	puts "================================================="
+    if Dice.curr_score > 300
+      puts "Your current score is #{Dice.curr_score}."
+      print "Roll Second Turn? y/n\n"
+      puts "================================================="
+      if gets.chomp.to_s == "y"
+        puts "PRINTING RESULTS FOR TURN - SECOND ROLL"
+      	Dice.scoring_second_turn
+      	#print_results
+      	#update_score
+      	puts "================================================="
+      else
+      	puts "No Second Turn availed or available"
+      	puts "================================================="
+      end
     else
-    	puts "No Second Turn availed or available"
-    	puts "================================================="
+      puts "Oops, Your score is less than 300. You can`t roll second turn, Next player"
+      puts "Will take turn"
     end
 end
 

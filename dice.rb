@@ -1,5 +1,6 @@
 module Dice
     @current_score = 0
+    #@final_score_achieved = false
     
     def curr_score
         @current_score
@@ -155,9 +156,7 @@ module Dice
     			puts "================================================="
     		end
     		if proceed == "n" || @second_turn_remainder.count == 0
-    		    puts "================================================="
     			puts "No more dice to roll for this turn"
-    			puts "================================================="
     			break 
     		end
     	end
