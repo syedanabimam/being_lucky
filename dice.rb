@@ -20,9 +20,9 @@ module Dice
     end
     
     def dice_first_turn
-    	#@dice = Array.new(5) { rand(1...6) } #create random array between 1..6
+    	@dice = Array.new(5) { rand(1...6) } #create random array between 1..6
         #@dice = [2, 2, 2, 1, 5]
-        @dice = [3, 1, 5, 3, 3]
+        #@dice = [3, 1, 5, 3, 3]
         
     	@combo_check = @dice.select{ |e| @dice.count(e) > 2 } #find 3 combo pattern
     	

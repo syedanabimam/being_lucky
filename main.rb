@@ -138,8 +138,8 @@ def play_game
       	puts "No Another Turn availed or available"
       	puts "================================================="        
       else
-        puts "Oops, Your score #{Dice.curr_score} is less than 300. You can`t roll second turn, Next player"
-        puts "Will take turn"
+        puts "Oops, Your score #{Dice.curr_score} is less than 300. You can`t roll another turn on"
+        puts "top of your previous turn, Next player Will take turn"
       end
     end
 end
