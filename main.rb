@@ -6,6 +6,9 @@ include Dice
 #print "Player, please Enter your name: "
 #player_name = gets.chomp.to_s
 @player_numbers = 0
+@counter_turn = 0
+@game_start_counter = 0
+@all_players_this_turn_record = {}
 
 def register_players
   puts "================================================="
@@ -50,6 +53,12 @@ def register_players
       Hash[@player_scores.map{ |k, v| [k.to_sym, v] }]
   end
   
+  create_turns_counter
+  
+  @players_names.each do |name|
+    @all_players_this_turn_record[name.to_sym] = false
+  end
+  
   puts "All added players registered. Exiting to Main Menu"
   puts "Select the option of 1. Play game to begin Being Lucky"
 end
@@ -74,21 +83,127 @@ def leaderboards
   end
 end
 
+def check_if_all_players_have_taken_turn
+    @all_players_played = false
+    
+    @player_turns_counter.each do |name, turn_counter|
+      if turn_counter == @counter_turn
+        #@all_players_played = true
+        puts "This player #{name} has same number of turns (player turn counter#{turn_counter} : game turn counter#{@counter_turn})"
+        @all_players_played_record[name.to_sym] = true 
+      else
+        puts "Player #{name} has played #{turn_counter} which is not same as the turns taken: #{@counter_turn}"
+        @all_players_played_record[name.to_sym] = false  
+        #@all_players_played = false
+      end
+    end
+    puts "Players for this turn have played status: #{@all_players_played_record}"
+    if @all_players_played_record.include? false
+      puts "Not all players have played their turns"
+    else
+      puts "All players have played their turns"
+      @all_players_played = true
+      #@counter_turn += 1
+      @player_turns_counter
+    end
+     #if @all_players_played == true
+end
+
+def increase_turn_counter
+  #@all_players_not_played = true
+  #puts "Increasing turn counter"
+  #puts "Current player is #{@players_names[@selected_player_name]}"
+  @player_turns_counter.each do |name, turn_counter|
+    if name == @players_names[@selected_player_name].to_sym
+      #puts "Increasing turn counter for player #{name} now"
+      @player_turns_counter[name.to_sym] += 1
+      @game_start_counter += 1
+      @all_players_this_turn_record[name.to_sym] = true
+    end
+    #if @player_turns_counter[name.to_sym] == 1
+     #  @game_start_counter += 1
+    #end
+    #puts "Turn counter for #{name} is #{@player_turns_counter[name.to_sym]}"
+  end
+  
+  if @game_start_counter == @player_numbers
+    @counter_turn += 1 
+    @game_start_counter = 0
+    @all_players_this_turn_record.each { |name, status| @all_players_this_turn_record[name.to_sym] = false } 
+    puts "Check leaderboard if you want to know the score"
+    #@all_players_not_played = false
+    #puts "After this counter for turn has increased, currently: #{@all_players_this_turn_record}"
+  else
+    #puts "Not all players have taken their turn"
+    @all_players_this_turn_record.each do |name, status|
+      if status == false
+       # @all_players_not_played = true
+        #puts "This player #{name} has not taken turn"
+      end
+    end
+    puts @all_players_this_turn_record
+  end
+  
+  #puts "Currently players turns are: #{@player_turns_counter} and counter_turn is #{@counter_turn}"
+end
+
 def play_game
+    increase_turn_counter
+    Dice.set_curr_score
+    #check_if_all_players_have_taken_turn
+    #puts "Players turn current status #{@all_players_played} and counter is #{@counter_turn}"
     print "Roll first Turn? y/n\n"
     puts "================================================="
     if gets.chomp.to_s == "y"
     	Dice.dice_first_turn
-    	Dice.scoring_first_turn_combo
-    	Dice.scoring_first_turn_noncombo
-    	puts "PRINTING RESULTS FOR TURN - FIRST ROLL"
-    	Dice.print_results
+    	Dice.check_if_all_dices_scores
+    	if Dice.get_all_dice_score_status == true
+    	  if Dice.get_all_five_dice_reroll_status == true
+    	      #Dice.scoring_first_turn_combo 1
+          	#Dice.scoring_first_turn_noncombo 1
+          	puts "PRINTING RESULTS FOR TURN - REROLL"
+    	      Dice.scoring_first_turn_combo
+      	    Dice.scoring_first_turn_noncombo          	
+          	Dice.print_results
+          	#update_score
+    	  else
+    	      #update_score EBD
+    	  end
+    	else
+    	  Dice.scoring_first_turn_combo
+      	Dice.scoring_first_turn_noncombo
+      	puts "PRINTING RESULTS FOR TURN - FIRST ROLL"
+      	Dice.print_results
+      	if Dice.get_all_five_dice_reroll_status == true && Dice.curr_score >= 300
+      	  #puts "line 175"
+      	  #update_score
+      	  print "Roll another turn? y/n\n"
+          puts "================================================="
+          if gets.chomp.to_s == "y"
+            puts "PRINTING RESULTS FOR TURN - SECOND ROLL"
+          	Dice.scoring_second_turn
+          	puts "================================================="
+          	puts "Exiting this turn"
+          	puts "================================================="
+          	puts "Accumulated score by now is : #{Dice.get_accumulated_score}"
+          else
+            puts "you decided not to take another turn for accumulated score after re-rolling"
+          end
+
+      	end
+      	
+    	end
+
     	 # Need to call this appt place
     	puts "================================================="
     else
       if Dice.get_all_dice_score_status == true
         puts "================================================="
         puts "You have availed to add score from all 5 dices"
+        if Dice.curr_score >= 300
+      	  update_score
+      	  puts "line 189"
+      	end
         puts "================================================="
       else
         puts "================================================="
@@ -103,7 +218,7 @@ def play_game
     # end
     
     if Dice.curr_score >= 300 && Dice.get_all_dice_score_status == false
-
+      #update_score
       print "Roll another turn? y/n\n"
       puts "================================================="
       if gets.chomp.to_s == "y"
@@ -114,15 +229,20 @@ def play_game
       	puts "================================================="
       	puts "Accumulated score by now is : #{Dice.get_accumulated_score}"
       	if Dice.get_accumulated_score > 0
-      	  update_score  
-      	  Dice.set_curr_score
+      	  #update_score 
+      	  #puts "line 217 - #{Dice.curr_score}"
+      	  #Dice.set_curr_score
       	end
-      	
+      	update_score
+      	puts "line 221 - #{Dice.curr_score}"
+      	Dice.set_curr_score
       	#print_results
       	#update_score
       	puts "================================================="
       else
         update_score
+        puts "Line 225"
+        puts "update_score already done on line 174"
         puts "Score updated. Your current score is #{Dice.curr_score}."
         puts "================================================="   
         Dice.set_curr_score
@@ -132,11 +252,16 @@ def play_game
     else
       if Dice.get_all_dice_score_status == true
         update_score
+        puts "line 235"
         puts "Score updated. Your current score is #{Dice.curr_score}."
         puts "=================================================" 
         Dice.set_curr_score
       	puts "No Another Turn availed or available"
-      	puts "================================================="        
+      	puts "=================================================" 
+      elsif Dice.get_all_five_dice_reroll_status == true
+        update_score
+        puts "Line 248 - Score updated to #{Dice.curr_score}"
+        Dice.set_curr_score
       else
         puts "Oops, Your score #{Dice.curr_score} is less than 300. You can`t roll another turn on"
         puts "top of your previous turn, Next player Will take turn"
@@ -148,10 +273,20 @@ def select_player_to_play
   puts "Players Names:"
   puts "================================================="
   counter = 0
-  @players_names.each do |name|
-    counter += 1
-    puts "#{counter} - Player Name: #{name}"
+  #@players_names.each do |name|
+   # counter += 1
+   # puts "#{counter} - Player Name: #{name}"
+  #end
+  
+  @all_players_this_turn_record.each do |name, status|
+   counter += 1
+    if status == true
+      puts "#{counter} - Player Name: #{name} (Have taken the turn)"
+    elsif status == false
+      puts "#{counter} - Player Name: #{name} (Have not taken the turn)"
+    end
   end
+  
   puts "================================================="
   puts "Select Which player wants to take the first turn? i.e. Type Numeric no. of player name"
   puts "================================================="
@@ -177,10 +312,19 @@ def update_score
         #puts "curr player is #{curr_player}"
         score = score + Dice.curr_score 
         @player_scores[name] = score
-        #puts "this is new score: #{score}"
+        puts "#{curr_player} is new score: #{score}"
         #puts @player_scores
       end
     end
+end
+
+def create_turns_counter
+  #player names assigned to turns they have taken
+  @player_turns_counter = {}
+  @players_names.each do |name|
+    @player_turns_counter[name.to_sym] = 0
+  end
+  #puts @player_turns_counter
 end
 
 while(true) do

@@ -1,14 +1,18 @@
 module Dice
     @current_score = 0
     @all_dice_scores_add = false
-    #@final_score_achieved = false
-    
+    @rolling_all_five_again = false
+
     def curr_score
         @current_score
     end
     
     def self.set_curr_score
         @current_score = 0
+    end
+    
+    def get_all_five_dice_reroll_status
+       @rolling_all_five_again
     end
     
     def get_all_dice_score_status
@@ -21,8 +25,13 @@ module Dice
     
     def dice_first_turn
     	@dice = Array.new(5) { rand(1...6) } #create random array between 1..6
-        #@dice = [2, 2, 2, 1, 5]
-        #@dice = [3, 1, 5, 3, 3]
+        #@dice = [3, 3, 3, 4, 5] # OK
+        #@dice = [2, 2, 2, 4, 5] # OK
+        #@dice = [3, 1, 5, 3, 3] # INPROCESS, FIXED
+        #@dice = [3, 5, 1, 1, 5] # FIXED, OK
+        #@dice = [1, 1, 1, 1, 3] # FIXED, OK
+        #@dice = [1, 1, 1, 1, 5] # FIXED, OK
+        #@dice = [4, 1, 2, 3, 5] # FIXED, OK
         
     	@combo_check = @dice.select{ |e| @dice.count(e) > 2 } #find 3 combo pattern
     	
@@ -37,8 +46,6 @@ module Dice
     	else
     		@remaining_dice = @dice - @combo_check
     	end
-    	
-    	check_if_all_dices_scores
     end
     
     def check_if_all_dices_scores
@@ -58,6 +65,7 @@ module Dice
                puts "================================================="
                puts "Rolling the dices again."
                puts "================================================="
+               @rolling_all_five_again = true
                dice_first_turn
            else
                puts "================================================="
@@ -65,6 +73,7 @@ module Dice
                puts "================================================="
                scoring_first_turn_combo
                scoring_first_turn_noncombo
+               @rolling_all_five_again = false
                @all_dice_scores_add = true
            end
        else
@@ -101,7 +110,6 @@ module Dice
        	puts "No three number combo pattern detected"
        	puts "================================================="
        end
-       #@remaining_dice = @dice - @combo
     end
     
     def scoring_first_turn_noncombo
@@ -128,14 +136,12 @@ module Dice
        	end
        end  	
       end
-      #puts "single: #{@single_score_dice_arr}"
       @non_dice_array = @remaining_dice - @single_score_dice_arr
     end
     
     def scoring_second_turn
         @accumulated_score = 0
     	@second_dice = Array.new(@non_dice_array.count) { rand(1...6) }
-    	#@second_dice = [3, 6]
     	@second_single_score_dice_arr = []
     
     	@second_dice.each do |num|
@@ -147,7 +153,6 @@ module Dice
     	   		@second_single_score_dice_arr << num
     	   	end
     	end
-    	#@current_score = @current_score + @accumulated_score
     	
     	@second_turn_remainder = @second_dice - @second_single_score_dice_arr
        	puts "================================================="
@@ -164,7 +169,6 @@ module Dice
             puts "Accumulated Score: #{@accumulated_score}"
             puts "================================================="
             if @accumulated_score > 0
-                ##puts "Your accumulated score is #{@accumulated_score} which is higher than 0, so you can play"
         		if @second_turn_remainder.count == 0
         		    @current_score = @current_score + @accumulated_score
         		    puts "================================================="
@@ -240,13 +244,6 @@ module Dice
     			break     
             end
         end    	    
-    	
-    	#if @accumulated_score == 0
-    	#    puts "You couldn`t score(#{@accumulated_score}) with any dice in this turn hence no more turns for you."
-    	 #   puts "Next player will play now!"
-    	#else
-    	#end
-	
     end
     
     def get_accumulated_score 
