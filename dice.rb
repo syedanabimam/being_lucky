@@ -32,6 +32,7 @@ module Dice
         #@dice = [1, 1, 1, 1, 3] # FIXED, OK
         #@dice = [1, 1, 1, 1, 5] # FIXED, OK
         #@dice = [4, 1, 2, 3, 5] # FIXED, OK
+        #@dice = [4, 3, 2, 4, 2] # DEAL WITH IT ASAP
         
     	@combo_check = @dice.select{ |e| @dice.count(e) > 2 } #find 3 combo pattern
     	

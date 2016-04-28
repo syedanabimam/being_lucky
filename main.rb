@@ -8,6 +8,7 @@ include Dice
 @counter_turn = 0
 @game_start_counter = 0
 @final_turn = false
+@last_turn_counter = 0
 @all_players_this_turn_record = {}
 
 def register_players
@@ -98,9 +99,11 @@ def increase_turn_counter
 end
 
 def play_game
+    @curr_player_score = @player_scores[@players_names[@selected_player_name].to_sym]
+    puts "Score is: #{@curr_player_score} and name is #{@players_names[@selected_player_name]}"
     increase_turn_counter
     Dice.set_curr_score
-    print "Roll first Turn? y/n\n"
+    print "Turn - First Roll? y/n\n"
     puts "================================================="
     if gets.chomp.to_s == "y"
     	Dice.dice_first_turn
@@ -115,10 +118,10 @@ def play_game
     	else
     	  Dice.scoring_first_turn_combo
       	Dice.scoring_first_turn_noncombo
-      	puts "PRINTING RESULTS FOR TURN - FIRST ROLL"
+      	puts "PRINTING RESULTS FOR TURN - FIRST ROLL FOR 5 DICES SCORE"
       	Dice.print_results
-      	if Dice.get_all_five_dice_reroll_status == true && Dice.curr_score >= 300
-      	  print "Roll another turn? y/n\n"
+      	if Dice.get_all_five_dice_reroll_status == true && (@curr_player_score >= 300 || Dice.curr_score >= 300)
+      	  print "Turn - Another roll? y/n\n"
           puts "================================================="
           if gets.chomp.to_s == "y"
             puts "PRINTING RESULTS FOR TURN - SECOND ROLL"
@@ -149,8 +152,8 @@ def play_game
       end
     end
 
-    if Dice.curr_score >= 300 && Dice.get_all_dice_score_status == false
-      print "Roll another turn? y/n\n"
+    if (@curr_player_score >= 300 || Dice.curr_score >= 300) && Dice.get_all_dice_score_status == false
+      print "Turn - Accumulated Roll? y/n\n"
       puts "================================================="
       if gets.chomp.to_s == "y"
         puts "PRINTING RESULTS FOR TURN - SECOND ROLL"
@@ -187,8 +190,8 @@ def play_game
         puts "Line 248 - Score updated to #{Dice.curr_score}"
         Dice.set_curr_score
       else
-        puts "Oops, Your score #{Dice.curr_score} is less than 300. You can`t roll another turn on"
-        puts "top of your previous turn, Next player Will take turn"
+        puts "Oops, Your score #{Dice.curr_score} is less than 300. You can`t enter game"
+        puts "unless you get 300 in a single turn, Next player Will take turn"
       end
     end
 end
@@ -236,11 +239,12 @@ end
 def check_if_it_is_end_turn
   @player_scores.each do |name, score|  
     #curr_player = @players_names[@selected_player_name].to_sym
-    #if name.to_s == "joe"
-    #  @player_scores[name] = 3000
-    #elsif name.to_s == "roe"
-    #  @player_scores[name] = 3200
-    #end
+    
+    # if name.to_s == "joe"
+    #   @player_scores[name] = 3000
+    # elsif name.to_s == "roe"
+    #   @player_scores[name] = 3200
+    # end
     
     #puts "Score: #{@player_scores[name]}"
     if @player_scores[name] >= 3000
@@ -253,21 +257,30 @@ def check_if_it_is_end_turn
 end
 
 def display_winner
-  @player_end_results = Hash[@player_scores.sort_by{|k, v| v}.reverse]
-  name = @player_end_results.keys[0]
-  score = @player_end_results.values[0]
-  puts @player_end_results
-  puts "Winner is #{name} and score is #{score}"
-  puts "      _ "
-  puts "     /(|"
-  puts "    (  :"
-  puts "   __\  \  _____"
-  puts " (____)  `|     | "
-  puts "(____)|   |     |  "
-  puts " (____).__|     |   "
-  puts "  (___)__.|_____|    "
-  puts "Game will exit now. Please play again and try being lucky :) if you were not this time"
-  exit
+  
+  
+  if @last_turn_counter == @player_numbers
+      @player_end_results = Hash[@player_scores.sort_by{|k, v| v}.reverse]
+      name = @player_end_results.keys[0]
+      score = @player_end_results.values[0]
+      Dice.leaderboard
+      puts "Winner for Being Lucky is #{name} and score is #{score}"
+      puts "      _ "
+      puts "     /(|"
+      puts "    (  :"
+      puts "   __\  \  _____"
+      puts " (____)  `|     | "
+      puts "(____)|   |     |  "
+      puts " (____).__|     |   "
+      puts "  (___)__.|_____|    "
+      puts ""
+      puts "Game will exit now. Please play again and try being lucky :) if you were not this time"
+      puts ""
+      exit
+  else
+      puts "Let all players finish their turn first"
+      puts "Last turn counter: #{@last_turn_counter} -- Player Numbers: #{@player_numbers}"
+  end
 end
 
 while(true) do
@@ -296,8 +309,9 @@ while(true) do
         select_player_to_play
         check_if_it_is_end_turn
         if @final_turn == true
-          puts "Game has entered into final phase yet"
+          puts "Game has entered into final phase"
           play_game
+          @last_turn_counter += 1
           display_winner
         else
           puts "Game has not entered into final phase yet"
