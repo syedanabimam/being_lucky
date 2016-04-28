@@ -1,30 +1,35 @@
 module Dice
+    #Initializes necessary variables
     @current_score = 0
     @all_dice_scores_add = false
     @rolling_all_five_again = false
 
+    #Show current score
     def self.curr_score
         @current_score
     end
     
+    #Set current turn score to zero
     def self.set_curr_score
         @current_score = 0
     end
     
+    #Get status of all five dices rolling again or not
     def self.get_all_five_dice_reroll_status
        @rolling_all_five_again
     end
     
+    #Check if all dice are scoring and whether score needs to be added
     def self.get_all_dice_score_status
        @all_dice_scores_add
     end
     
-    def self.set_all_dice_score_status(value)
-        @all_dice_scores_add = value
-    end
-    
+    #Play first roll of the turn
     def self.dice_first_turn
-    	@dice = Array.new(5) { rand(1...6) } #create random array between 1..6
+        #create random array between 1..6
+    	@dice = Array.new(5) { rand(1...6) } 
+    	
+    	#Random dice patterns to test
         #@dice = [3, 3, 3, 4, 5] # OK
         #@dice = [2, 2, 2, 4, 5] # OK
         #@dice = [3, 1, 5, 3, 3] # INPROCESS, FIXED
@@ -34,12 +39,16 @@ module Dice
         #@dice = [4, 1, 2, 3, 5] # FIXED, OK
         #@dice = [4, 3, 2, 4, 2] # DEAL WITH IT ASAP
         
-    	@combo_check = @dice.select{ |e| @dice.count(e) > 2 } #find 3 combo pattern
+        #find 3 combo pattern
+    	@combo_check = @dice.select{ |e| @dice.count(e) > 2 } 
     	
+    	#Get common denominator of combo pattern
     	@combo = @combo_check.first(3)
     	
-    	@combo_num = @combo.uniq.join() #Isolate and find common number for 3-pattern
+    	#Isolate and find common number for 3-pattern
+    	@combo_num = @combo.uniq.join()
     
+        #Check combo count and determine remianing dices based on that
     	if @combo_check.count == 4
     		@remaining_dice = @dice | @combo_check
     	elsif @combo.count == 3
@@ -49,8 +58,9 @@ module Dice
     	end
     end
     
+    #Checks if all dices are scoring
     def self.check_if_all_dices_scores
-       
+       #Checks if all dices are scoring and validates it with conditions
        if ((@combo_num.length > 0) && (@remaining_dice.include? 1) && (@remaining_dice.include? 5))
            
            puts "================================================="
@@ -62,12 +72,14 @@ module Dice
            puts "================================================="
            print "which ever it is, please proceed by entering y/n?\n"
            puts "================================================="
+           #If user select to roll all the five dices again then turn is started again
            if gets.chomp.to_s == "y"
                puts "================================================="
                puts "Rolling the dices again."
                puts "================================================="
                @rolling_all_five_again = true
                dice_first_turn
+           #if not players all 5 dices scores are added   
            else
                puts "================================================="
                puts "You decided not to roll the 5 dices. Score will be added for the 5 dices"
@@ -77,6 +89,7 @@ module Dice
                @rolling_all_five_again = false
                @all_dice_scores_add = true
            end
+       #Player is informed not all 5 dices are scoring
        else
           puts "================================================="
           puts "Not all dices are scoring"
@@ -85,26 +98,20 @@ module Dice
        end
     end
 
+    #Add score for combo dices as per scoring criteria
     def self.scoring_first_turn_combo
-       #puts "combo_num: #{@combo_num.class}"
        case @combo_num
        when "1"
-       	#puts "Added 1000 score"
        	@current_score = 1000
        when "2"
-       	#puts "Added 200 score"
        	@current_score = 200
        when "3"
-       	#puts "Added 300 score"
        	@current_score = 300
        when "4"
-       	#puts "Added 400 score"
        	@current_score = 400
        when "5"
-       	#puts "Added 500 score"
        	@current_score = 500
        when "6"
-       	#puts "Added 600 score"
        	@current_score = 600
        else
         puts "================================================="   
@@ -113,9 +120,10 @@ module Dice
        end
     end
     
+    #Add scores for non-combo dices as per scoring criteria
     def self.scoring_first_turn_noncombo
       @single_score_dice_arr = []
-      
+      #Scores added for remaining dices
       if @remaining_dice.count != 0
        @remaining_dice.each do |num|
        	if num == 1
@@ -126,6 +134,7 @@ module Dice
        		@single_score_dice_arr << num
        	end
        end
+      #In case no remaining dices are there, score is added 
       else
        @dice.each do |num|
        	if num == 1
@@ -137,14 +146,18 @@ module Dice
        	end
        end  	
       end
+      #Non scoring dices are determined here
       @non_dice_array = @remaining_dice - @single_score_dice_arr
     end
     
+    #Add Score for Second roll
     def self.scoring_second_turn
         @accumulated_score = 0
+        #Generate numbers for remaining dices
     	@second_dice = Array.new(@non_dice_array.count) { rand(1...6) }
     	@second_single_score_dice_arr = []
-    
+        
+        #Scores added as per the criteria
     	@second_dice.each do |num|
     	   	if num == 1
     	   		@accumulated_score = @accumulated_score + 100 	
@@ -155,6 +168,7 @@ module Dice
     	   	end
     	end
     	
+    	#Remaining dices after second roll is calculated and results are printed out
     	@second_turn_remainder = @second_dice - @second_single_score_dice_arr
        	puts "================================================="
     	puts "Second turn results for remaining dice(s): #{@second_dice}"
@@ -164,11 +178,14 @@ module Dice
     	puts "Remaining elements now: #{@second_turn_remainder}"
     	puts "================================================="
     	
-    	
+    	#Loop runs for consecutive rolls until players rolls all dices to gain accumulated scores
+    	#or lose all accumulated score if receive zero scoring dices or skip rolling in middle of it
+    	#to preserve the score
         loop do
             puts "================================================="
             puts "Accumulated Score: #{@accumulated_score}"
             puts "================================================="
+            #Score is only added if accumulated score for previous roll is greater than zero
             if @accumulated_score > 0
         		if @second_turn_remainder.count == 0
         		    @current_score = @current_score + @accumulated_score
@@ -178,9 +195,12 @@ module Dice
         			puts "No more dice to roll for this turn" 
         			break 
         		end
+        		#Player is prompted to answer whether to play another roll
         		print "Want another go? y/n \n"
         		puts "================================================="
         		proceed = gets.chomp.to_s
+        		#If answer is yes and accumulated score is zero then dices are generated
+        		#for the remaining dices and scores are added as per the scoring criteria
         		if proceed == "y" && @accumulated_score > 0
         			@second_dice_another_roll = Array.new(@second_turn_remainder.count) { rand(1...6) }
         			@second_single_score_dice_arr_again = []
@@ -194,7 +214,7 @@ module Dice
         			   		@second_single_score_dice_arr_again << num
         			   	end
         			end 
-        			
+        			#Remaining dices are calculated and results are printed out
         			@second_turn_again_remainder = @second_dice_another_roll - @second_single_score_dice_arr_again
         			@second_turn_remainder = @second_turn_again_remainder
         			puts "================================================="
@@ -207,6 +227,7 @@ module Dice
         			puts "Total (Current + Accumulated) Score by now: #{@current_score + @accumulated_score}"
         			puts "================================================="
         			
+        			#If accumulates score is zero then player is informed and results are printed out
         			if @accumulated_score_more == 0
         			   puts "================================================="
         			   puts "You scored #{@accumulated_score_more} in this roll"
@@ -216,6 +237,7 @@ module Dice
         			   puts "Your current score is: #{@current_score}"
         			   puts "================================================="
         			   break
+        			#If accumulated score is not zero then player is informed of new scores and results are printed
         			else
         			   puts "=================================================" 
         			   puts "Your current accumulated score is #{@accumulated_score}"
@@ -227,6 +249,7 @@ module Dice
         			   puts "================================================="
         			end
         		end
+        		#if answer to roll another is no then current score is added with any accumulated score there is
         		if proceed == "n" 
         		    @current_score = @current_score + @accumulated_score
         		    puts "You decided not to take another roll"
@@ -236,6 +259,7 @@ module Dice
         			puts "Total Score by now: #{@current_score}"
         			break 
         		end
+            #Otherwise, If score is zero and there are no dices, results are printed then
             else
                 puts "Your score for this roll is 0 therefore no more turns for you"
         	    puts "================================================="
@@ -247,11 +271,12 @@ module Dice
         end    	    
     end
     
+    #Show accumulated score
     def self.get_accumulated_score 
         @accumulated_score
     end
     
-    
+    #Print out the results
     def self.print_results
     	puts ""
     	puts "===================SPECIFICS====================="
@@ -270,6 +295,7 @@ module Dice
     	puts "Current Score: #{@current_score}"
     end
     
+    #Print out the game rules
     def self.game_rules 
        puts ""
        puts "===================================================================="
@@ -303,6 +329,7 @@ module Dice
        puts ""
     end
     
+    #Print out thumbs up
     def self.thumbs_up
       puts "      _ "
       puts "     /(|"
@@ -315,6 +342,7 @@ module Dice
       puts "..."        
     end
     
+    #Print out post win game art
     def self.not_bad
         puts "
         ░░░░░░░░▄██████████▄▄░░░░░░░░
