@@ -3,7 +3,7 @@ module Dice
     @all_dice_scores_add = false
     @rolling_all_five_again = false
 
-    def curr_score
+    def self.curr_score
         @current_score
     end
     
@@ -11,19 +11,19 @@ module Dice
         @current_score = 0
     end
     
-    def get_all_five_dice_reroll_status
+    def self.get_all_five_dice_reroll_status
        @rolling_all_five_again
     end
     
-    def get_all_dice_score_status
+    def self.get_all_dice_score_status
        @all_dice_scores_add
     end
     
-    def set_all_dice_score_status(value)
+    def self.set_all_dice_score_status(value)
         @all_dice_scores_add = value
     end
     
-    def dice_first_turn
+    def self.dice_first_turn
     	@dice = Array.new(5) { rand(1...6) } #create random array between 1..6
         #@dice = [3, 3, 3, 4, 5] # OK
         #@dice = [2, 2, 2, 4, 5] # OK
@@ -49,7 +49,7 @@ module Dice
     	end
     end
     
-    def check_if_all_dices_scores
+    def self.check_if_all_dices_scores
        
        if ((@combo_num.length > 0) && (@remaining_dice.include? 1) && (@remaining_dice.include? 5))
            
@@ -85,7 +85,7 @@ module Dice
        end
     end
 
-    def scoring_first_turn_combo
+    def self.scoring_first_turn_combo
        #puts "combo_num: #{@combo_num.class}"
        case @combo_num
        when "1"
@@ -113,7 +113,7 @@ module Dice
        end
     end
     
-    def scoring_first_turn_noncombo
+    def self.scoring_first_turn_noncombo
       @single_score_dice_arr = []
       
       if @remaining_dice.count != 0
@@ -140,7 +140,7 @@ module Dice
       @non_dice_array = @remaining_dice - @single_score_dice_arr
     end
     
-    def scoring_second_turn
+    def self.scoring_second_turn
         @accumulated_score = 0
     	@second_dice = Array.new(@non_dice_array.count) { rand(1...6) }
     	@second_single_score_dice_arr = []
@@ -247,12 +247,12 @@ module Dice
         end    	    
     end
     
-    def get_accumulated_score 
+    def self.get_accumulated_score 
         @accumulated_score
     end
     
     
-    def print_results
+    def self.print_results
     	puts ""
     	puts "===================SPECIFICS====================="
     	puts "Dice results(arr): #{@dice}"
@@ -270,7 +270,7 @@ module Dice
     	puts "Current Score: #{@current_score}"
     end
     
-    def game_rules 
+    def self.game_rules 
        puts ""
        puts "===================================================================="
        puts " 
@@ -281,8 +281,10 @@ module Dice
        
        2 or more player roll 5 dice to play being Lucky.
        In each turn, scores are awarded based on subsequent dice 
-       results. Players can further play to accumulate further
-       score for that turn.
+       results. Player must be able to get 300 in a single turn
+       before they are allowed to accumulate score. Once 300 score
+       is attained, Players can further play to accumulate further
+       score for that turn until last round.
        
        ¯\_(ツ)_/¯
        
@@ -299,6 +301,48 @@ module Dice
         "
        puts "===================================================================="
        puts ""
+    end
+    
+    def self.thumbs_up
+      puts "      _ "
+      puts "     /(|"
+      puts "    (  :"
+      puts "   __\  \  _____"
+      puts " (____)  `|     | "
+      puts "(____)|   |     |  "
+      puts " (____).__|     |   "
+      puts "  (___)__.|_____|    "
+      puts "..."        
+    end
+    
+    def self.not_bad
+        puts "
+        ░░░░░░░░▄██████████▄▄░░░░░░░░
+        ░░░░░░▄█████████████████▄░░░░░
+        ░░░░░██▀▀▀▀▀▀▀▀▀▀▀████████░░░░
+        ░░░░██░░░░░░░░░░░░░░███████░░░
+        ░░░██░░░░░░░░░░░░░░░████████░░
+        ░░░█▀░░░░░░░░░░░░░░░▀███████░░
+        ░░░█▄▄██▄░░░▀█████▄░░▀██████░░
+        ░░░█▀███▄▀░░░▄██▄▄█▀░░░█████▄░
+        ░░░█░░▀▀█░░░░░▀▀░░░▀░░░██░░▀▄█
+        ░░░█░░░█░░░▄░░░░░░░░░░░░░██░██
+        ░░░█░░█▄▄▄▄█▄▀▄░░░░░░░░░▄▄█▄█░
+        ░░░█░░█▄▄▄▄▄▄░▀▄░░░░░░░░▄░▀█░░
+        ░░░█░█▄████▀██▄▀░░░░░░░█░▀▀░░░
+        ░░░░██▀░▄▄▄▄░░░▄▀░░░░▄▀█░░░░░░
+        ░░░░░█▄▀░░░░▀█▀█▀░▄▄▀░▄▀░░░░░░
+        ░░░░░▀▄░░░░░░░░▄▄▀░░░░█░░░░░░░
+        ░░░░░▄██▀▀▀▀▀▀▀░░░░░░░█▄░░░░░░
+        ░░▄▄▀░░░▀▄░░░░░░░░░░▄▀░▀▀▄░░░░
+        ▄▀▀░░░░░░░█▄░░░░░░▄▀░░░░░░█▄░░
+        █░░░░░░░░░░░░░░░░░░░░░░░░░░▀█▄
+        ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+        █▄░░█ █▀▀█ ▀▀█▀▀░░█▀▀█ █▀▀█ █▀▀▄
+        █░█░█ █░░█ ░░█░░░░█▀▀▄ █▄▄█ █░░█
+        █░░▀█ █▄▄█ ░░█░░░░█▄▄█ █░░█ █▄▄▀
+        ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 
+        "
     end
     
 end
